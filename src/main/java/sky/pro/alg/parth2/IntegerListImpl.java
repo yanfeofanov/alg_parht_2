@@ -22,7 +22,7 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public Integer add(Integer item) {
         if (size == storage.length) {
-            resize(size + 1);
+            grow();
         }
         storage[size] = item;
         size++;
@@ -32,8 +32,8 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public Integer add(int index, Integer item) {
 
-        if (size == storage.length) {  // Проверяем если фиксовая длинна равна длине массива то
-            resize(size+1);    //  вызываем метод resize который увеличивает размер массива в 2х раза, выделяя новую область памяти и копирую туда
+        if (size >= storage.length) {  // Проверяем если фиксовая длинна равна длине массива то
+            grow();    //  вызываем метод resize который увеличивает размер массива в 2х раза, выделяя новую область памяти и копирую туда
         }                             // предыдущий заполенный массив Пример oldArray[1,2,3,4,5] newArray[1,2,3,4,5,null,null,null,null,null]
         for (int i = size; i > index; i--) {    // бежим по длинне массива до указанного индекса с конца, начинаем перезаписывать ячейки
             storage[i] = storage[i - 1];        // Пример oldArray[1,2,3,4,5,null] newArray[1,2,3,4,5,5]
@@ -57,14 +57,14 @@ public class IntegerListImpl implements IntegerList {
         if (index == -1) {
             throw new ElementNotFindException();
         }
-      return remove(index);
+        return remove(index);
     }
 
     @Override
     public Integer remove(int index) {
         checkBox(index);
         Integer result = storage[index];
-        for (int i = index; i < size ; i++) {
+        for (int i = index; i < size; i++) {
             storage[i - 1] = storage[i];
         }
         size--;
@@ -105,14 +105,14 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public boolean equals(IntegerList otherList) {
-        if(otherList == null){
-            throw  new ElementNotFindException();
+        if (otherList == null) {
+            throw new ElementNotFindException();
         }
-        if(size != otherList.size()){
+        if (size != otherList.size()) {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            if(!Objects.equals(storage[i],otherList.get(i))){
+            if (!Objects.equals(storage[i], otherList.get(i))) {
                 return false;
             }
         }
@@ -131,7 +131,7 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public void clear() {
-        Arrays.fill(storage,0,size,null);
+        Arrays.fill(storage, 0, size, null);
         size = 0;
     }
 
@@ -141,28 +141,26 @@ public class IntegerListImpl implements IntegerList {
         return Arrays.copyOf(storage, size);
     }
 
-    private void resize(int newSize) {
-    int reSize = size * 2;
-    reSize = Math.max(reSize,newSize);
-    Integer[] newData = new Integer[reSize];
-    System.arraycopy(storage,0,newData,0,size);
-    storage = newData;
+    private void grow() {
+        Integer[] storage = new Integer[(int) (this.storage.length * 1.5)];
+        System.arraycopy(this.storage, 0, storage, 0, this.storage.length);
+        this.storage = storage;
     }
 
-    public void checkBox(int index){
-        if(index < 0 || index >= size){
-            throw  new NullItemException();
+    public void checkBox(int index) {
+        if (index < 0 || index >= size) {
+            throw new NullItemException();
         }
     }
 
-    private void  sort(){
-        int in,out;
+    private void sort() {
+        int in, out;
         for (out = 1; out < size; out++) {
             Integer temp = storage[out];
             in = out;
-            while(in > 0 && storage[in - 1] >= temp){
+            while (in > 0 && storage[in - 1] >= temp) {
                 storage[in] = storage[in - 1];
-                in --;
+                in--;
             }
             storage[in] = temp;
         }
